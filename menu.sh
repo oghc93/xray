@@ -39,15 +39,15 @@ show_header() {
   local pro_badge="${DIM}belum di-setup${NC}"
   if [[ -f "$PRO_CONFIG" ]]; then
     if [[ -n "$TELEGRAM_BOT_TOKEN" ]]; then
-      pro_badge="${GREEN}aktif${NC} ${DIM}(limit+kuota+Telegram)${NC}"
+      pro_badge="${GREEN}aktif${NC}"
     else
-      pro_badge="${GREEN}aktif${NC} ${DIM}(limit+kuota)${NC}"
+      pro_badge="${GREEN}aktif${NC}"
     fi
   fi
 
   echo -e "${CYAN}$UI_BOX_TOP${NC}"
   ui_line_center "${WHITE}${BOLD}CHANELOG VPN TUNNEL MANAGER${NC}"
-  ui_line_center "${DIM}${PURPLE}pro edition${NC}"
+  ui_line_center "${DIM}${PURPLE}BY CHANEL OG${NC}"
   echo -e "${CYAN}$UI_BOX_MID${NC}"
   ui_kv "Domain"        "$domain"
   ui_kv "IP VPS"        "$ip"
@@ -63,8 +63,8 @@ show_header() {
   ui_2col "$(ui_dot $db_on) Dropbear" "$(ui_dot $stunnel_on) Stunnel4"
   ui_2col "$(ui_dot $haproxy_on) HAProxy" ""
   echo -e "${CYAN}$UI_BOX_MID${NC}"
-  ui_kv "Multiplex 443" "$mux_badge"
-  ui_kv "Fitur Pro"     "$pro_badge"
+  ui_kv "Multiplex" "$mux_badge"
+  ui_kv "Fitur"     "$pro_badge"
   echo -e "${CYAN}$UI_BOX_MID${NC}"
   ui_line "${WHITE}${BOLD}${total_akun}${NC}${WHITE} akun aktif${NC}"
   ui_line "${DIM}VMess ${vmess_count} · VLess ${vless_count} · Trojan ${trojan_count} · SS ${ss_count} · SSH ${ssh_count}${NC}"
@@ -83,10 +83,10 @@ main_menu() {
   ui_2col "$(ui_menu_num 6 'Nginx')"           "$(ui_menu_num 7 'Dropbear')"
   ui_2col "$(ui_menu_num 8 'HAProxy SSL')"     "$(ui_menu_num 9 'Change Domain')"
   ui_2col "$(ui_menu_num 10 'Update Script')"  "$(ui_menu_num 11 'Status Layanan')"
-  ui_2col "$(ui_menu_num 12 'System Info')"    "$(ui_menu_num 13 'Bot Telegram Pro')"
+  ui_2col "$(ui_menu_num 12 'System Info')"    "$(ui_menu_num 13 'Bot Telegram')"
   echo -e "${CYAN}$UI_BOX_MID${NC}"
   ui_line "${PURPLE}${BOLD}  LAINNYA${NC}"
-  ui_2col "$(ui_menu_num 14 'Uninstall' "$RED")" "$(ui_menu_num 15 'Rebuild OS VPS' "$RED")"
+  ui_2col "$(ui_menu_num 14 'Uninstall' "$RED")" "$(ui_menu_num 15 'Rebuild OS' "$RED")"
   ui_line "$(ui_menu_num 0 'Exit' "$DIM")"
   echo -e "${CYAN}$UI_BOX_BOT${NC}"
   echo ""
