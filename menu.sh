@@ -34,7 +34,7 @@ show_header() {
   systemctl is-active --quiet haproxy  2>/dev/null && haproxy_on=1
 
   local mux_badge="${DIM}nonaktif${NC}"
-  [[ -f "$SCRIPT_DIR/.multiplex-443-active" ]] && mux_badge="${GREEN}aktif"
+  [[ -f "$SCRIPT_DIR/.multiplex-443-active" ]] && mux_badge="${GREEN}aktif${NC}"
 
   local pro_badge="${DIM}belum di-setup${NC}"
   if [[ -f "$PRO_CONFIG" ]]; then
