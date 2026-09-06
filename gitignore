@@ -1,0 +1,22 @@
+# Rahasia & konfigurasi lokal — JANGAN pernah commit ini
+.env
+*.env
+**/config.local.php
+api/config.php
+*.pem
+*.key
+*.crt
+
+# Data akun / hasil runtime (kalau kamu taruh salinan db di repo saat testing)
+*.db
+db/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+
+# Log
+*.log
