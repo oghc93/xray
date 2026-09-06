@@ -32,7 +32,7 @@ tg_header() {
 tg_menu() {
   tg_header
   echo -e "${CYAN}$UI_BOX_TOP${NC}"
-  ui_2col "$(ui_menu_num 1 'Setup Bot Token & Chat ID' "$GREEN")" "$(ui_menu_num 2 'Test Kirim Notifikasi' "$GREEN")"
+  ui_2col "$(ui_menu_num 1 'Setup Bot' "$GREEN")"  "$(ui_menu_num 2 'Test Kirim Notifikasi' "$GREEN")"
   ui_2col "$(ui_menu_num 3 'Default Limit Kuota')" "$(ui_menu_num 4 'Default Durasi Trial')"
   ui_2col "$(ui_menu_num 5 'Toggle Notifikasi' "$PURPLE")" "$(ui_menu_num 6 'Matikan Bot Telegram' "$RED")"
   echo -e "${CYAN}$UI_BOX_MID${NC}"
