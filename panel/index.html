@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPN Tunnel Manager — Protocol Grid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FBFAF7;
+    --surface:#FFFFFF;
+    --ink:#1F2320;
+    --ink-soft:#565F5A;
+    --muted:#8D948E;
+    --line:#E7E4DB;
+    --accent:#3D5A80;
+    --accent-soft:#E7EDF4;
+    --amber:#B58122;
+    --amber-soft:#F7EFDD;
+    --rose:#A24444;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Source Sans 3',sans-serif;font-size:14.5px;}
+  h1,h2,h3,.display{font-family:'Space Grotesk',sans-serif;}
+  .mono{font-variant-numeric:tabular-nums;}
+
+  header{background:var(--surface);border-bottom:1px solid var(--line);}
+  .header-top{display:flex;align-items:center;justify-content:space-between;padding:16px 32px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:30px;height:30px;border-radius:8px;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:center;font-family:'Space Grotesk';font-weight:700;font-size:14px;}
+  .brand .name{font-family:'Space Grotesk';font-weight:600;font-size:16px;}
+  .header-right{display:flex;align-items:center;gap:18px;font-size:13px;color:var(--ink-soft);}
+  .dot-live{width:7px;height:7px;border-radius:50%;background:var(--accent);display:inline-block;margin-right:6px;}
+
+  .tabs{display:flex;gap:2px;padding:0 32px;overflow-x:auto;}
+  .tab{padding:13px 18px;font-size:14px;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:7px;}
+  .tab .n{font-size:11.5px;color:var(--muted);background:var(--paper);padding:1px 6px;border-radius:20px;}
+  .tab.active{color:var(--ink);border-bottom-color:var(--accent);font-weight:600;}
+  .tab.active .n{background:var(--accent-soft);color:var(--accent);}
+
+  main{padding:30px 32px 60px;max-width:1220px;margin:0 auto;}
+
+  .hero-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:22px;gap:20px;flex-wrap:wrap;}
+  .hero-row h1{font-size:24px;font-weight:600;margin:0 0 6px;}
+  .hero-row p{margin:0;color:var(--ink-soft);font-size:13.5px;}
+  .btn{border:1px solid var(--line);background:var(--surface);padding:9px 16px;border-radius:8px;font-size:13.5px;cursor:pointer;font-family:inherit;color:var(--ink);}
+  .btn:hover{border-color:var(--ink-soft);}
+  .btn-primary{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+
+  .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+  .proto-card{background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:8px;padding:18px 18px;}
+  .proto-card.c-vless{border-left-color:#6E5AA6;}
+  .proto-card.c-trojan{border-left-color:var(--rose);}
+  .proto-card.c-ss{border-left-color:#3E8A63;}
+  .proto-card .top{display:flex;justify-content:space-between;align-items:flex-start;}
+  .proto-card .p-name{font-family:'Space Grotesk';font-weight:600;font-size:15px;}
+  .proto-card .p-count{font-family:'Space Grotesk';font-size:30px;font-weight:600;margin-top:10px;}
+  .proto-card .p-sub{color:var(--muted);font-size:12px;margin-top:4px;}
+  .proto-card .add-link{margin-top:14px;font-size:12.5px;color:var(--accent);cursor:pointer;font-weight:600;}
+
+  .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;padding:16px 22px;border-bottom:1px solid var(--line);}
+  .panel-head h2{font-size:16px;font-weight:600;margin:0;}
+  .search{border:1px solid var(--line);border-radius:7px;padding:6px 12px;font-size:13px;width:220px;background:var(--paper);}
+
+  table{width:100%;border-collapse:collapse;}
+  thead th{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:10px 22px;border-bottom:1px solid var(--line);}
+  tbody td{padding:12px 22px;border-bottom:1px solid var(--line);font-size:13.5px;}
+  tbody tr:last-child td{border-bottom:none;}
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:12px;font-weight:600;}
+  .badge.ok{background:#E6F1EA;color:#2C7A4B;}
+  .badge.warn{background:var(--amber-soft);color:var(--amber);}
+  .badge.off{background:#F1EFEA;color:var(--muted);}
+  .link-action{color:var(--accent);font-size:13px;cursor:pointer;font-weight:600;}
+
+  .bottom-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;margin-top:16px;}
+  .service-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);}
+  .svc{background:var(--surface);padding:15px 18px;display:flex;justify-content:space-between;align-items:center;}
+  .svc-name{font-weight:600;font-size:13.5px;}
+  .svc-meta{color:var(--muted);font-size:11.5px;margin-top:2px;}
+  .toggle{width:38px;height:21px;border-radius:11px;background:var(--line);position:relative;cursor:pointer;flex-shrink:0;}
+  .toggle.on{background:var(--accent);}
+  .toggle .k{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;transition:.15s;}
+  .toggle.on .k{left:19px;}
+
+  .vitals{padding:6px 0;}
+  .vital-row{display:flex;justify-content:space-between;padding:11px 22px;font-size:13px;}
+  .vital-row .k{color:var(--ink-soft);}
+  .vital-row .v{font-weight:600;}
+
+  .overlay{position:fixed;inset:0;background:rgba(20,22,20,.4);display:none;align-items:center;justify-content:center;z-index:50;}
+  .overlay.open{display:flex;}
+  .modal{background:var(--surface);width:440px;max-width:92vw;border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2);}
+  .modal-head{padding:20px 24px;border-bottom:1px solid var(--line);}
+  .modal-head h3{margin:0;font-size:18px;font-weight:600;}
+  .modal-head p{margin:4px 0 0;color:var(--muted);font-size:12.5px;}
+  .modal-body{padding:20px 24px;display:flex;flex-direction:column;gap:13px;}
+  .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:5px;font-weight:600;}
+  .field input,.field select{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:7px;font-family:inherit;font-size:13.5px;background:var(--paper);}
+  .field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .modal-foot{padding:16px 24px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--paper);padding:11px 20px;border-radius:9px;font-size:13px;opacity:0;transition:.25s;z-index:60;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  @media(max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+    .bottom-grid{grid-template-columns:1fr;}
+    .service-grid{grid-template-columns:1fr;}
+    main{padding:20px;}
+    .header-top{padding:14px 18px;}
+    .tabs{padding:0 18px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div class="brand"><div class="mark">CV</div><div class="name">Chanelog Tunnel</div></div>
+    <div class="header-right">
+      <span id="hDomain"><span class="dot-live" id="liveDot" style="background:var(--muted)"></span>mode contoh (belum terhubung)</span>
+      <span class="mono" id="hIp">—</span>
+      <button class="btn" id="btnConnect">Hubungkan ke server</button>
+      <button class="btn" id="btnSync">Sinkronkan</button>
+    </div>
+  </div>
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="overview">Ringkasan</div>
+    <div class="tab" data-tab="vmess">VMess <span class="n">18</span></div>
+    <div class="tab" data-tab="vless">VLess <span class="n">12</span></div>
+    <div class="tab" data-tab="trojan">Trojan <span class="n">7</span></div>
+    <div class="tab" data-tab="ss">Shadowsocks <span class="n">9</span></div>
+    <div class="tab" data-tab="sshws">SSH‑WS <span class="n">5</span></div>
+    <div class="tab" data-tab="services">Layanan</div>
+  </div>
+</header>
+
+<main>
+  <div class="hero-row">
+    <div>
+      <h1>51 akun berjalan di 1 server</h1>
+      <p>Semua protokol tunnel dalam satu tampilan — buat, pantau, dan hentikan akun tanpa masuk terminal.</p>
+    </div>
+    <button class="btn btn-primary" id="btnAdd">+ Buat akun baru</button>
+  </div>
+
+  <div class="grid">
+    <div class="proto-card">
+      <div class="top"><span class="p-name">VMess</span><span class="badge ok" id="badgeVmess">●&nbsp;xray aktif</span></div>
+      <div class="p-count" id="countVmess">18</div>
+      <div class="p-sub">contoh data</div>
+      <div class="add-link" data-proto="vmess">+ Tambah akun VMess</div>
+    </div>
+    <div class="proto-card c-vless">
+      <div class="top"><span class="p-name">VLess</span><span class="badge ok" id="badgeVless">●&nbsp;xray aktif</span></div>
+      <div class="p-count" id="countVless">12</div>
+      <div class="p-sub">contoh data</div>
+      <div class="add-link" data-proto="vless">+ Tambah akun VLess</div>
+    </div>
+    <div class="proto-card c-trojan">
+      <div class="top"><span class="p-name">Trojan</span><span class="badge ok" id="badgeTrojan">●&nbsp;xray aktif</span></div>
+      <div class="p-count" id="countTrojan">7</div>
+      <div class="p-sub">contoh data</div>
+      <div class="add-link" data-proto="trojan">+ Tambah akun Trojan</div>
+    </div>
+    <div class="proto-card c-ss">
+      <div class="top"><span class="p-name">Shadowsocks</span><span class="badge ok" id="badgeSs">●&nbsp;xray aktif</span></div>
+      <div class="p-count" id="countSs">9</div>
+      <div class="p-sub">contoh data</div>
+      <div class="add-link" data-proto="ss">+ Tambah akun Shadowsocks</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-head">
+      <h2>Semua akun</h2>
+      <input class="search" placeholder="Cari username…">
+    </div>
+    <table>
+      <thead><tr><th>Pengguna</th><th>Protokol</th><th>Status</th><th>Kedaluwarsa</th><th>Kuota</th><th></th></tr></thead>
+      <tbody id="accBody"></tbody>
+    </table>
+  </div>
+
+  <div class="bottom-grid">
+    <div class="panel">
+      <div class="panel-head"><h2>Layanan sistem</h2></div>
+      <div class="service-grid" id="svcGrid"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><h2>Vital server</h2></div>
+      <div class="vitals">
+        <div class="vital-row"><span class="k">OS</span><span class="v" id="vOs">Ubuntu 22.04 LTS</span></div>
+        <div class="vital-row"><span class="k">Uptime</span><span class="v" id="vUptime">14 hari 3 jam</span></div>
+        <div class="vital-row"><span class="k">CPU</span><span class="v" id="vCpu">22% / 4 core</span></div>
+        <div class="vital-row"><span class="k">RAM</span><span class="v" id="vMem">1.5 / 4 GB</span></div>
+        <div class="vital-row"><span class="k">Disk</span><span class="v" id="vDisk">24.4 / 40 GB</span></div>
+        <div class="vital-row"><span class="k">Load average</span><span class="v mono" id="vLoad">0.34, 0.29, 0.31</span></div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Buat akun baru</h3><p>Akun akan langsung tersedia begitu server disinkronkan.</p></div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Protokol</label>
+        <select id="fProto"><option value="vmess">VMess</option><option value="vless">VLess</option><option value="trojan">Trojan</option><option value="ss">Shadowsocks</option><option value="sshws">SSH‑WS / SSL</option></select>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Username</label><input id="fUser" placeholder="cth. budi01"></div>
+        <div class="field"><label>Tipe</label><select id="fTipe"><option value="reguler">Reguler (hari)</option><option value="trial">Trial (jam)</option></select></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label id="fDaysLabel">Masa aktif (hari)</label><input id="fDays" type="number" value="30"></div>
+        <div class="field"><label>Limit IP</label><input id="fIpLimit" type="number" value="2"></div>
+      </div>
+      <div class="field"><label>Kuota (GB, 0 = unlimited)</label><input id="fQuota" type="number" value="0"></div>
+      <div id="formMsg" style="font-size:12.5px;color:var(--rose);display:none;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="cancelModal">Batal</button>
+      <button class="btn btn-primary" id="submitModal">Buat akun</button>
+    </div>
+  </div>
+</div>
+<div class="overlay" id="connectOverlay">
+  <div class="modal">
+    <div class="modal-head"><h3>Hubungkan ke server</h3><p>Isi alamat API dan API key yang dibuat saat deploy (lihat README-DEPLOY.md). Tersimpan hanya untuk sesi ini, tidak disimpan di browser.</p></div>
+    <div class="modal-body">
+      <div class="field"><label>URL API</label><input id="cApiBase" placeholder="https://tunnel.contoh-domain.com/api"></div>
+      <div class="field"><label>API Key</label><input id="cApiKey" type="password" placeholder="isi API key dari server"></div>
+      <div id="connectMsg" style="font-size:12.5px;color:var(--rose);display:none;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn" id="cancelConnect">Batal</button>
+      <button class="btn btn-primary" id="submitConnect">Hubungkan</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── Data contoh (dipakai selama belum terhubung ke server) ───────── */
+const demoAccounts = [
+  {username:"budi01", proto:"vmess", status:"ok", exp:"29 hari lagi", quota:"12.4 / 50 GB"},
+  {username:"siti_ws", proto:"sshws", status:"warn", exp:"3 hari lagi", quota:"Unlimited"},
+  {username:"trial_andi", proto:"vless", status:"warn", exp:"6 jam lagi", quota:"0.8 / 5 GB"},
+  {username:"kios_jaya", proto:"trojan", status:"ok", exp:"18 hari lagi", quota:"40 / 40 GB"},
+  {username:"rina_ss", proto:"ss", status:"off", exp:"kedaluwarsa", quota:"5 / 5 GB"},
+  {username:"agus99", proto:"vmess", status:"ok", exp:"25 hari lagi", quota:"3.1 / 20 GB"},
+];
+const demoServices = [
+  {name:"xray", meta:"VMess · VLess · Trojan", on:true},
+  {name:"nginx", meta:"reverse proxy + TLS", on:true},
+  {name:"dropbear", meta:"SSH port 443 / 109", on:true},
+  {name:"haproxy", meta:"multiplex SNI", on:false},
+];
+const protoLabel = {vmess:"VMess", vless:"VLess", trojan:"Trojan", ss:"Shadowsocks", sshws:"SSH‑WS"};
+
+/* ── State koneksi (hanya di memori tab ini, tidak disimpan) ───────── */
+let api = { base: "", key: "", connected: false };
+
+function badge(s){
+  if(s==="ok") return '<span class="badge ok">● Aktif</span>';
+  if(s==="warn") return '<span class="badge warn">● Segera habis</span>';
+  return '<span class="badge off">● Kedaluwarsa</span>';
+}
+function renderAccounts(list){
+  const body = document.getElementById('accBody');
+  body.innerHTML = '';
+  list.forEach(a=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${a.username}</td><td>${protoLabel[a.proto]||a.proto}</td><td>${badge(a.status||'ok')}</td><td>${a.exp||'-'}</td><td class="mono">${a.quota||'-'}</td>
+      <td><span class="link-action" data-del-proto="${a.proto}" data-del-user="${a.username}">Hapus</span></td>`;
+    body.appendChild(tr);
+  });
+  document.querySelectorAll('[data-del-user]').forEach(el=>{
+    el.addEventListener('click', ()=>deleteAccount(el.dataset.delProto, el.dataset.delUser));
+  });
+  const counts = {vmess:0, vless:0, trojan:0, ss:0};
+  list.forEach(a=>{ if(counts[a.proto]!==undefined) counts[a.proto]++; });
+  document.getElementById('countVmess').textContent = counts.vmess;
+  document.getElementById('countVless').textContent = counts.vless;
+  document.getElementById('countTrojan').textContent = counts.trojan;
+  document.getElementById('countSs').textContent = counts.ss;
+}
+function renderServices(list){
+  const svcGrid = document.getElementById('svcGrid');
+  svcGrid.innerHTML = '';
+  list.forEach(s=>{
+    const el=document.createElement('div');
+    el.className='svc';
+    el.innerHTML=`<div><div class="svc-name">${s.name}</div><div class="svc-meta">${s.meta}</div></div><div class="toggle ${s.on?'on':''}"><div class="k"></div></div>`;
+    el.querySelector('.toggle').addEventListener('click', function(){ handleServiceToggle(s.name, this); });
+    svcGrid.appendChild(el);
+  });
+}
+renderAccounts(demoAccounts);
+renderServices(demoServices);
+
+/* ── Panggilan API ──────────────────────────────────────────────── */
+async function apiCall(path, opts={}){
+  const res = await fetch(api.base.replace(/\/$/,'') + path, {
+    ...opts,
+    headers: { 'Content-Type': 'application/json', 'X-Api-Key': api.key, ...(opts.headers||{}) }
+  });
+  const data = await res.json().catch(()=>({ok:false, error:'Respons tidak valid'}));
+  if(!res.ok || data.ok === false) throw new Error(data.error || ('HTTP '+res.status));
+  return data;
+}
+
+async function loadSummary(){
+  const s = await apiCall('?action=summary');
+  document.getElementById('hDomain').innerHTML = `<span class="dot-live" style="background:var(--accent)"></span>${s.domain||'-'}`;
+  document.getElementById('hIp').textContent = s.server_ip || '-';
+  document.getElementById('vOs').textContent = s.os || '-';
+  document.getElementById('vUptime').textContent = s.uptime || '-';
+  document.getElementById('vCpu').textContent = (s.cpu_cores? s.cpu_cores+' core' : '-');
+  document.getElementById('vMem').textContent = s.mem || '-';
+  document.getElementById('vDisk').textContent = s.disk || '-';
+  document.getElementById('vLoad').textContent = s.load || '-';
+}
+async function loadAccounts(){
+  const rows = await apiCall('?action=accounts');
+  renderAccounts(rows.map(r=>({username:r.username, proto:r.proto, exp:r.exp, quota:(r.quota_mb?(r.quota_mb/1024).toFixed(1)+' GB':'Unlimited')})));
+}
+async function loadServices(sFromSummary){
+  const map = sFromSummary || {};
+  const meta = {xray:"VMess · VLess · Trojan", nginx:"reverse proxy + TLS", dropbear:"SSH port 443 / 109", stunnel4:"SSH‑SSL", haproxy:"multiplex SNI"};
+  renderServices(Object.keys(map).map(name=>({name, meta:meta[name]||'', on: map[name]==='active'})));
+}
+async function refreshAll(){
+  try{
+    const s = await apiCall('?action=summary');
+    document.getElementById('hDomain').innerHTML = `<span class="dot-live" style="background:var(--accent)"></span>${s.domain||'-'}`;
+    document.getElementById('hIp').textContent = s.server_ip || '-';
+    document.getElementById('vOs').textContent = s.os || '-';
+    document.getElementById('vUptime').textContent = s.uptime || '-';
+    document.getElementById('vCpu').textContent = (s.cpu_cores? s.cpu_cores+' core' : '-');
+    document.getElementById('vMem').textContent = s.mem || '-';
+    document.getElementById('vDisk').textContent = s.disk || '-';
+    document.getElementById('vLoad').textContent = s.load || '-';
+    await loadServices(s.services);
+    await loadAccounts();
+  }catch(err){
+    showToast('Gagal ambil data: '+err.message);
+  }
+}
+
+async function handleServiceToggle(name, el){
+  const willTurnOn = !el.classList.contains('on');
+  if(!api.connected){ el.classList.toggle('on'); showToast('Mode contoh — belum terhubung ke server'); return; }
+  showToast((willTurnOn?'Mengaktifkan ':'Menghentikan ')+name+'…');
+  try{
+    await apiCall('?action=service', {method:'POST', body: JSON.stringify({name, action: willTurnOn?'start':'stop'})});
+    el.classList.toggle('on');
+    showToast(name+' berhasil di-'+(willTurnOn?'aktifkan':'hentikan'));
+  }catch(err){
+    showToast('Gagal: '+err.message);
+  }
+}
+
+async function deleteAccount(proto, username){
+  if(!api.connected){ showToast('Mode contoh — belum terhubung ke server'); return; }
+  if(!confirm(`Hapus akun ${username} (${protoLabel[proto]||proto})?`)) return;
+  try{
+    await apiCall('?action=accounts', {method:'DELETE', body: JSON.stringify({proto, username})});
+    showToast('Akun '+username+' dihapus');
+    loadAccounts();
+  }catch(err){
+    showToast('Gagal hapus: '+err.message);
+  }
+}
+
+/* ── Tab, modal buat akun ──────────────────────────────────────── */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+document.getElementById('fTipe').addEventListener('change', function(){
+  document.getElementById('fDaysLabel').textContent = this.value==='trial' ? 'Masa aktif (jam)' : 'Masa aktif (hari)';
+});
+const overlay=document.getElementById('overlay');
+document.getElementById('btnAdd').onclick=()=>overlay.classList.add('open');
+document.getElementById('cancelModal').onclick=()=>overlay.classList.remove('open');
+overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open');});
+document.querySelectorAll('.add-link').forEach(l=>l.addEventListener('click', function(){
+  document.getElementById('fProto').value = this.dataset.proto;
+  overlay.classList.add('open');
+}));
+
+document.getElementById('submitModal').onclick = async ()=>{
+  const proto = document.getElementById('fProto').value;
+  const username = document.getElementById('fUser').value.trim();
+  const tipe = document.getElementById('fTipe').value;
+  const masa = parseInt(document.getElementById('fDays').value || '0', 10);
+  const ipLimit = parseInt(document.getElementById('fIpLimit').value || '2', 10);
+  const quota = parseFloat(document.getElementById('fQuota').value || '0');
+  const msg = document.getElementById('formMsg');
+  msg.style.display = 'none';
+  if(!username){ msg.textContent = 'Username wajib diisi'; msg.style.display='block'; return; }
+
+  if(!api.connected){
+    overlay.classList.remove('open');
+    showToast('Mode contoh — hubungkan ke server dulu untuk membuat akun sungguhan');
+    return;
+  }
+  try{
+    const payload = { proto, username, ip_limit: ipLimit, quota_gb: quota };
+    if(tipe==='trial'){ payload.trial_hours = masa; payload.days = 0; } else { payload.days = masa; payload.trial_hours = 0; }
+    const r = await apiCall('?action=accounts', {method:'POST', body: JSON.stringify(payload)});
+    overlay.classList.remove('open');
+    showToast('Akun dibuat — rahasia: '+r.secret);
+    loadAccounts();
+  }catch(err){
+    msg.textContent = err.message; msg.style.display = 'block';
+  }
+};
+
+/* ── Modal koneksi API ─────────────────────────────────────────── */
+const connectOverlay = document.getElementById('connectOverlay');
+document.getElementById('btnConnect').onclick = ()=>connectOverlay.classList.add('open');
+document.getElementById('cancelConnect').onclick = ()=>connectOverlay.classList.remove('open');
+connectOverlay.addEventListener('click', e=>{ if(e.target===connectOverlay) connectOverlay.classList.remove('open'); });
+document.getElementById('btnSync').onclick = ()=>{ if(api.connected){ refreshAll(); showToast('Menyinkronkan…'); } else { showToast('Belum terhubung ke server'); } };
+
+document.getElementById('submitConnect').onclick = async ()=>{
+  const base = document.getElementById('cApiBase').value.trim();
+  const key = document.getElementById('cApiKey').value.trim();
+  const msg = document.getElementById('connectMsg');
+  msg.style.display = 'none';
+  if(!base || !key){ msg.textContent='URL dan API key wajib diisi'; msg.style.display='block'; return; }
+  api = { base, key, connected: false };
+  try{
+    await apiCall('?action=summary');
+    api.connected = true;
+    connectOverlay.classList.remove('open');
+    showToast('Terhubung ke server');
+    refreshAll();
+  }catch(err){
+    msg.textContent = 'Gagal terhubung: '+err.message; msg.style.display='block';
+  }
+};
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);}
+</script>
+</body>
+</html>
